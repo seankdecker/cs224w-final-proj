@@ -2,6 +2,7 @@ import snap
 import numpy as np
 import csv # for reading in banned_labels, node_labels
 import matplotlib.pyplot as plt
+import random
 
 DATASET = 'title'
 ####### PATHS ############
@@ -57,7 +58,8 @@ def load_banned():
 def get_banned_ids(banned, subreddit_to_id):
     res = []
     for ban in banned:
-        res.append(subreddit_to_id[banned])
+        res.append(subreddit_to_id[ban])
+    return res
 
 # returns a list of all banned subreddits that appear in G
 def banned_sub_in_G(G, node_labels, banned):
@@ -75,6 +77,18 @@ def check_for_banned(G, node_labels, banned):
             print('BANNED: ', node_labels[n.GetId()], ' - ', n.GetId())
             count += 1
     print(count, len(banned), G.GetNodes())
+
+# generate a random subgraph from G of no more than size subgraph_size with num_banned banned 
+def get_random_subgraph(G, banned_ids, subgraph_size = 300, num_banned=10):
+  banned_ids = random.sample(banned_ids, num_banned)
+  # Graph contains nodes with ids that increase sequentially, so 
+  # just take a random random from a list from 0 to G.GetNodes()
+  others_ids = random.sample([i for i in range(G.GetNodes())], subgraph_size - num_banned)
+  ids_to_include = list(set(banned_ids + others_ids))
+  Vector_to_include = snap.TIntV()
+  for id_included in ids_to_include:
+    Vector_to_include.Add(id_included)
+  return snap.GetSubGraph(G, Vector_to_include)
 
 # load dataset of banned subreddits
 # load SNAP graph which corresponds to DATASET
