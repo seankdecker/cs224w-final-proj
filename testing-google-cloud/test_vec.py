@@ -14,10 +14,15 @@ lang_client = language.LanguageServiceClient()
 MAX_TIME = "2018-06-26 19:57:21" #1530043041
 MIN_TIME = "2018-05-23 12:19:21" #1527077961
 
+# sentiment comment query limit
+# Note: sentiment measure has only 1 decimal place, but too many queries will take far too long
+SENTIMENT_LIMIT = 250
+
 def query_feature_vec(curr_subreddit):
     # get data from submissions table
     # # subscribers, # submissions, # unique authors, % posts marked NSFW, latest submission time
     # avg submissions/author
+    SUBM_ENTRIES = 5
     query_job = client.query(
     """
     SELECT Subreddit,
@@ -47,12 +52,15 @@ def query_feature_vec(curr_subreddit):
         vec.append(row.NumSubmissions / row.NumAuthors)
         numSubmissions = row.NumSubmissions
         newest_time = row.newest_time
+    if len(vec) < SUBM_ENTRIES:
+        vec.extend([0,0,0,0,0])
     #print(vec)
 
     # get data from comments table
     # # comments, # unique comment authors
     # avg comments/author
     # avg comments/submission
+    COMM_ENTRIES = 4
     query_job = client.query(
     """
     SELECT Subreddit,
@@ -73,11 +81,14 @@ def query_feature_vec(curr_subreddit):
         vec.extend([x for x in row[2:]])
         vec.append(row.NumComments / row.NumCommentAuthors)
         vec.append(row.NumComments / numSubmissions)
+    if len(vec) < SUBM_ENTRIES + COMM_ENTRIES:
+        vec.extend([0,0,0,0])
     #print(vec)
 
     # get avg sentiment of comments (currently sampling 250 comments)
     # (weighted and unweighted by magnitude, along with avg magnitude)
     # note: sentiment queries on a sample of text give a score and a magnitude
+    MAGN_ENTRIES = 3
     query_job = client.query(
     """
     SELECT Subreddit,
@@ -87,9 +98,10 @@ def query_feature_vec(curr_subreddit):
     WHERE lower(subreddit)="{}"
     AND created_utc <= CAST("{}" AS TIMESTAMP)
     AND created_utc >= CAST("{}" AS TIMESTAMP)
-    LIMIT 250
+    ORDER BY RAND()
+    LIMIT {}
     ;
-    """.format(curr_subreddit, MAX_TIME, MIN_TIME)
+    """.format(curr_subreddit, MAX_TIME, MIN_TIME, SENTIMENT_LIMIT)
     )
     results = query_job.result()
     print('received results! got data for sentiment analysis')
@@ -113,7 +125,7 @@ def query_feature_vec(curr_subreddit):
         vec.append(total / count)
         vec.append(total_mag / count)
     else:
-        vec.extend([0,0])
+        vec.extend([0,0,0])
     print(vec)
 
     return vec
