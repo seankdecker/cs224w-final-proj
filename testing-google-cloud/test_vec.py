@@ -9,6 +9,11 @@ from google.cloud.language import types
 client = bigquery.Client()
 lang_client = language.LanguageServiceClient()
 
+# time constraints
+# (maximally overlaping interval between the two)
+MAX_TIME = "2018-06-26 19:57:21" #1530043041
+MIN_TIME = "2018-05-23 12:19:21" #1527077961
+
 def query_feature_vec(curr_subreddit):
     # get data from submissions table
     # # subscribers, # submissions, # unique authors, % posts marked NSFW, latest submission time
@@ -24,10 +29,12 @@ def query_feature_vec(curr_subreddit):
     MAX(created_utc) AS newest_time
     FROM `pushshift.rt_reddit.submissions`
     WHERE lower(subreddit)="{}"
+    AND created_utc <= CAST("{}" AS TIMESTAMP)
+    AND created_utc >= CAST("{}" AS TIMESTAMP)
     GROUP BY SUBREDDIT, subreddit_id
     LIMIT 1
     ;
-    """.format(curr_subreddit)
+    """.format(curr_subreddit, MAX_TIME, MIN_TIME)
     )
     results = query_job.result()  # Waits for job to complete.
     print('received results! got submission data')
@@ -40,7 +47,7 @@ def query_feature_vec(curr_subreddit):
         vec.append(row.NumSubmissions / row.NumAuthors)
         numSubmissions = row.NumSubmissions
         newest_time = row.newest_time
-    print(vec)
+    #print(vec)
 
     # get data from comments table
     # # comments, # unique comment authors
@@ -54,9 +61,11 @@ def query_feature_vec(curr_subreddit):
     COUNT ( DISTINCT author ) AS NumCommentAuthors
     FROM `pushshift.rt_reddit.comments`
     WHERE lower(subreddit)="{}"
+    AND created_utc <= CAST("{}" AS TIMESTAMP)
+    AND created_utc >= CAST("{}" AS TIMESTAMP)
     GROUP BY SUBREDDIT, subreddit_id
     LIMIT 1;
-    """.format(curr_subreddit)
+    """.format(curr_subreddit, MAX_TIME, MIN_TIME)
     )
     results = query_job.result()
     print('received results! got comment data')
@@ -64,7 +73,7 @@ def query_feature_vec(curr_subreddit):
         vec.extend([x for x in row[2:]])
         vec.append(row.NumComments / row.NumCommentAuthors)
         vec.append(row.NumComments / numSubmissions)
-    print(vec)
+    #print(vec)
 
     # get avg sentiment of comments (currently sampling 250 comments)
     # (weighted and unweighted by magnitude, along with avg magnitude)
@@ -76,9 +85,11 @@ def query_feature_vec(curr_subreddit):
     body
     FROM `pushshift.rt_reddit.comments`
     WHERE lower(subreddit)="{}"
+    AND created_utc <= CAST("{}" AS TIMESTAMP)
+    AND created_utc >= CAST("{}" AS TIMESTAMP)
     LIMIT 250
     ;
-    """.format(curr_subreddit)
+    """.format(curr_subreddit, MAX_TIME, MIN_TIME)
     )
     results = query_job.result()
     print('received results! got data for sentiment analysis')
