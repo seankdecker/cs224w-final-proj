@@ -49,7 +49,7 @@ def load_banned():
     with open(banned_labels,'r') as fin:
         cr = csv.reader(fin, delimiter=',')
         for row in cr:
-            banned.add(row[0][2:]) # get rid of leading 'r/'
+            banned.add(row[0][2:].lower()) # get rid of leading 'r/' and make case insensitive
     return banned
 
 # prints out all banned subreddits in G
