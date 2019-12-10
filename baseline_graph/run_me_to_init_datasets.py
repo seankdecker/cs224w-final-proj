@@ -9,8 +9,6 @@ do the following:
   6 - run run_me_to_init_datasets.py
 '''
 import csv
-from tsv_to_csv import tsv_to_csv
-from make_snap_graph import build_snap_graph
 
 DATASETS = ['body', 'title']
 ####### PATHS ############
@@ -84,6 +82,20 @@ def build_snap_graph(dataset_name):
     cw = csv.writer(fou2, quotechar='', quoting=csv.QUOTE_NONE)
     for sub, id in subreddit_to_id.items():
       cw.writerow([sub, id])
+
+# convert the tsv file named src into a csv file named dst
+def tsv_to_csv(src, dst):
+  # read tab-delimited file
+  with open(src,'r') as fin:
+      cr = csv.reader(fin, delimiter='\t')
+      # remove the last element in each line because we don't need it
+      # and it has commas in it
+      filecontents = [line[:-1] for line in cr]
+
+  # write comma-delimited file (comma is the default delimiter)
+  with open(dst,'w') as fou:
+      cw = csv.writer(fou, quotechar='', quoting=csv.QUOTE_NONE)
+      cw.writerows(filecontents)
 
 if __name__ == '__main__':
   for dataset in DATASETS:
