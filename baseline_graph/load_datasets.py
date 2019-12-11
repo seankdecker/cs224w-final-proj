@@ -4,6 +4,10 @@ import csv # for reading in banned_labels, node_labels
 import matplotlib.pyplot as plt
 import random
 
+"""
+UTILITY FUNCTIONS
+"""
+
 DATASET = 'title'
 ####### PATHS ############
 folder = '{}-data'
@@ -88,6 +92,22 @@ def get_random_subgraph(G, banned_ids, subgraph_size = 300, num_banned=10):
   Vector_to_include = snap.TIntV()
   for id_included in ids_to_include:
     Vector_to_include.Add(id_included)
+  return snap.GetSubGraph(G, Vector_to_include)
+
+# generate a random subgraph from G of no more than size subgraph_size
+def get_random_subgraph_connected(G, banned_ids, subgraph_size = 300):
+  root = random.choice(banned_ids)
+  # do bfs from root, which is a banned subreddit
+  Vector_to_include.Add()
+  subgraph = set()
+  curr_elems = [root]
+  while(len(curr_elems) > 0 and len(subgraph) < subgraph_size):
+    pass
+
+  ids_to_include = list(set(banned_ids + others_ids))
+  Vector_to_include = snap.TIntV()
+  for id_included in ids_to_include:
+    
   return snap.GetSubGraph(G, Vector_to_include)
 
 # load dataset of banned subreddits
