@@ -98,17 +98,19 @@ def get_random_subgraph(G, banned_ids, subgraph_size = 300, num_banned=10):
 def get_random_subgraph_connected(G, banned_ids, subgraph_size = 300):
   root = random.choice(banned_ids)
   # do bfs from root, which is a banned subreddit
-  Vector_to_include.Add()
-  subgraph = set()
-  curr_elems = [root]
-  while(len(curr_elems) > 0 and len(subgraph) < subgraph_size):
-    pass
-
-  ids_to_include = list(set(banned_ids + others_ids))
-  Vector_to_include = snap.TIntV()
-  for id_included in ids_to_include:
-    
-  return snap.GetSubGraph(G, Vector_to_include)
+  bfs_G = snap.GetBfsTree(G, root, True, False)
+  Vec_of_bfs_G_nodes = snap.TIntV()
+  level = [root]
+  # iteratively levels of BFS tree
+  while (len(level) > 0):
+    curr = level.pop(0)
+    if (curr not in Vec_of_bfs_G_nodes):
+      Vec_of_bfs_G_nodes.Add(curr)
+    if (Vec_of_bfs_G_nodes.Len() == subgraph_size):
+      break
+    for neigh in G.GetNI(curr).GetOutEdges():
+      level.append(neigh)
+  return snap.GetSubGraph(G, Vec_of_bfs_G_nodes)
 
 # load dataset of banned subreddits
 # load SNAP graph which corresponds to DATASET
