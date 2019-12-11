@@ -1,0 +1,12 @@
+/*****
+ 
+*****/
+
+digraph G {
+  graph [splines=true overlap=false]
+  node  [shape=ellipse, width=0.3, height=0.3]
+  41 [label="changemyview"];
+  21931 [label="ideasforcmv"];
+  41 -> 21931;
+  label = "\n \n";  fontsize=24;
+}

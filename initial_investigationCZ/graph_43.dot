@@ -1,0 +1,10 @@
+/*****
+ 
+*****/
+
+digraph G {
+  graph [splines=true overlap=false]
+  node  [shape=ellipse, width=0.3, height=0.3]
+  43 [label="askreddit"];
+  label = "\n \n";  fontsize=24;
+}
