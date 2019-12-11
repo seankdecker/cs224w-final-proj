@@ -1,6 +1,6 @@
 from load_datasets import load_banned
 from load_datasets import load_graph
-from load_datasets import get_banned_ids, banned_sub_in_G, get_random_subgraph
+from load_datasets import get_banned_ids, banned_sub_in_G, get_random_subgraph, get_random_subgraph_connected
 import random
 import snap
 DATASET = 'title' 
@@ -20,6 +20,6 @@ if __name__ == '__main__':
   # rest of subreddits are for testing.
   TESTING = list(set(banned) - set(TRAINING))
   # generate subgraph of G
-  G_new = get_random_subgraph(G, get_banned_ids(TRAINING, subreddit_to_id))
+  G_new = get_random_subgraph_connected(G, get_banned_ids(TRAINING, subreddit_to_id))
   print('number of nodes in random subgraph: ', G_new.GetNodes())
 
